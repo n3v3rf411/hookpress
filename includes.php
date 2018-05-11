@@ -258,8 +258,6 @@ function hookpress_register_hooks() {
 
 	$all_hooks = hookpress_get_hooks( );
 
-    error_log('###########################################################################' . var_export($all_hooks, true));
-
 	if (!is_array( $all_hooks ) )
 		return;
 
@@ -285,8 +283,6 @@ function hookpress_register_hooks() {
 
 function hookpress_generic_action($id,$args) {
 	global $hookpress_version, $wpdb, $hookpress_actions, $hookpress_filters, $wp_version;
-
-    error_log('*********************************************************************************');
 
 	$webhooks = hookpress_get_hooks( );
 	$desc = $webhooks[$id];
@@ -367,10 +363,6 @@ function hookpress_generic_action($id,$args) {
     } else {
         $request_args['body'] = $obj_to_post;
     }
-
-    error_log("%% URL: $url");
-    error_log("%% method: $method");
-    error_log("%% request_args: ".var_export($request_args, true));
 
 	$request = apply_filters( 'hookpress_request', $request_args );
 	return wp_remote_request($url, $request);
