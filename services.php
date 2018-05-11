@@ -44,6 +44,7 @@ function hookpress_ajax_add_fields() {
 
 		$id = (int) $_POST['id'];
 		$edithook = array(
+            'method'=>$_POST['method'],
 			'url'=>$_POST['url'],
 			'type'=>$_POST['type'],
 			'hook'=>$_POST['hook'],
@@ -56,6 +57,7 @@ function hookpress_ajax_add_fields() {
 
 		// register the new webhook
 		$newhook = array(
+            'method'=>$_POST['method'],
 			'url'=>$_POST['url'],
 			'type'=>$_POST['type'],
 			'hook'=>$_POST['hook'],

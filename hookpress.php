@@ -16,9 +16,9 @@ require('includes.php');
 function hookpress_init() {
 	global $hookpress_version;
 
-	if ( !get_option('hookpress_version') ||
-		 version_compare($hookpress_version,get_option('hookpress_version')) > 0 )
-		update_option('hookpress_version',$hookpress_version);
+	if ( !get_site_option('hookpress_version') ||
+		 version_compare($hookpress_version,get_site_option('hookpress_version')) > 0 )
+		update_site_option('hookpress_version',$hookpress_version);
 
 	add_action('admin_menu', 'hookpress_config_page');
 	hookpress_register_hooks();
@@ -53,7 +53,7 @@ function hookpress_options() {
 }
 
 function hookpress_get_hooks() {
-	return get_option('hookpress_webhooks', array());
+	return get_site_option('hookpress_webhooks', array());
 }
 
 function hookpress_delete_hook($hook_id) {
@@ -77,5 +77,5 @@ function hookpress_update_hook( $hook_id, $hook ) {
 	return $hook_id;
 }
 function hookpress_save_hooks($webhooks) {
-	update_option('hookpress_webhooks', $webhooks);
+	update_site_option('hookpress_webhooks', $webhooks);
 }

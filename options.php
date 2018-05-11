@@ -116,6 +116,7 @@ var editSubmit = function editSubmit() {
 		url:'admin-ajax.php',
 		data:'action=hookpress_add_fields'
 				 +'&fields='+tb.find('#editfields').val().join()
+				 +'&method='+tb.find('#editmethod').val()
 				 +'&url='+tb.find('#editurl').val()
 				 +'&type='+tb.find('.newtype:checked').attr('id')
 				 +'&hook='+tb.find('#edithook').val()
@@ -171,6 +172,7 @@ var newSubmit = function newSubmit() {
 		url:'admin-ajax.php',
 		data:'action=hookpress_add_fields'
 				 +'&fields='+tb.find('#newfields').val().join()
+                 +'&method='+tb.find('#newmethod').val()
 				 +'&url='+tb.find('#newurl').val()
 				 +'&type='+tb.find('.newtype:checked').attr('id')
 				 +'&hook='+tb.find('#newhook').val()
@@ -363,7 +365,7 @@ var setEvents = function setEvents() {
 
 <?php echo hookpress_print_webhooks_table();?>
 
-	<p><input id="newwebhook" class="thickbox button" type="button" value="<?php _e("Add webhook",'hookpress');?>" title="<?php _e('Add new webhook','hookpress');?>" alt="#TB_inline?height=330&width=500&inlineId=hookpress-webhook"/></p>
+	<p><input id="newwebhook" class="thickbox button" type="button" value="<?php _e("Add webhook",'hookpress');?>" title="<?php _e('Add new webhook','hookpress');?>" alt="#TB_inline?height=350&width=500&inlineId=hookpress-webhook"/></p>
 		
 </form>
 
@@ -376,6 +378,19 @@ var setEvents = function setEvents() {
 <td><select name='newhook' id='newhook'></select></td></tr>
 <tr><td style='vertical-align: top'><label style='font-weight: bold' for='newfields'><?php _e("Fields",'hookpress');?>: </label><br/><small><?php _e("Ctrl-click on Windows or Command-click on Mac to select multiple. The <code>hook</code> field with the relevant hook name is always sent.");?></small><br/><span id='filtermessage'><small><?php _e('The first argument of a filter must always be sent and should be returned by the webhook, with modification.','hookpress');?></small></span></td><td><select style='vertical-align: top' name='newfields' id='newfields' multiple='multiple' size='8'>
 	</select></td></tr>
+<tr>
+    <td>
+        <label style='font-weight: bold' for='newmethod'><?php _e("Method",'hookpress');?>: </label>
+    </td>
+    <td>
+        <select name='newmethod' id='newmethod'>
+            <?php foreach(['GET', 'POST', 'PUT', 'DELETE'] as $method) {
+                $selected = $desc['method'] == $method ? 'selected="selected"' : '';
+                echo "<option value='$method' $selected>$method</option>";
+            } ?>
+        </select>
+    </td>
+</tr>
 <tr><td><label style='font-weight: bold' for='newurl'><?php _e("URL",'hookpress');?>: </label></td><td><input name='newurl' id='newurl' size='40' value='http://'></input></td></tr>
 </table>
 <?php	echo "<input type='hidden' id='submit-nonce' name='submit-nonce' value='" . wp_create_nonce( 'submit-webhook') . "' />"; ?>

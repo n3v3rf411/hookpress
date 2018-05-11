@@ -133,6 +133,21 @@ if ($desc['type'] == 'filter')
 	}
 	$desc['url'] = esc_html( $desc['url'] );
 ?></select></td></tr>
+
+<tr>
+    <td>
+        <label style='font-weight: bold' for='editmethod'><?php _e("Method", 'hookpress');?>: </label></td>
+    </td>
+    <td>
+        <select name='editmethod' id='editmethod'>
+            <?php foreach(['GET', 'POST', 'PUT', 'DELETE'] as $method) {
+                $selected = $desc['method'] == $method ? 'selected="selected"' : '';
+                echo "<option value='$method' $selected>$method</option>";
+            } ?>
+        </select>
+    </td>
+</tr>
+
 <tr><td><label style='font-weight: bold' for='newurl'><?php _e("URL",'hookpress');?>: </label></td>
 <td><input name='editurl' id='editurl' size='40' value="<?php echo $desc['url']; ?>"></input></td></tr>
 </table>
@@ -173,17 +188,19 @@ function hookpress_print_webhook_row( $id ) {
 	} else
 		$fields = esc_html( $desc['fields'][0] );
 
-	$edit = '<a href="#TB_inline?inlineId=hookpress-webhook&height=330&width=500" id="edit'. $html_safe['id'] . '" title="' . __('Edit this webhook') . '" class="thickbox edit">' . __('Edit') . '</a>';
+	$edit = '<a href="#TB_inline?inlineId=hookpress-webhook&height=370&width=500" id="edit'. $html_safe['id'] . '" title="' . __('Edit this webhook') . '" class="thickbox edit">' . __('Edit') . '</a>';
 
 	$activeornot = $desc['enabled'] ? 'active' : 'inactive';
 
 	$html_safe['hook'] = esc_html( $desc['hook'] );
+	$html_safe['method'] = esc_html( $desc['method'] );
 	$html_safe['url'] = esc_html( $desc['url'] );
 
 	echo "
 <tr id='$id' class='$activeornot'>
 	<td class='webhook-title'><strong>{$html_safe['hook']}</strong>
 	<div class='row-actions'>$nonce_action $nonce_delete<span class='edit'>$edit | <span class='delete'>$delete | </span><span class='action'>$action</span></div></td>
+	<td class='desc'><p>{$html_safe['method']}</p></td>
 	<td class='desc'><p>{$html_safe['url']}</p></td>
 	<td class='desc'><code ".($desc['type'] == 'filter' ? " style='background-color:#ECEC9D' title='".__('The data in the highlighted field is expected to be returned from the webhook, with modification.','hookpress')."'":"").">$fields</code></td>
 </tr>\n";
@@ -200,6 +217,7 @@ function hookpress_print_webhooks_table() {
 	<thead>
 	<tr>
 		<th scope="col" class="manage-column" style="width:15%"><?php _e("Hook","hookpress");?></th>
+		<th scope="col" class="manage-column" style="width:15%"><?php _e("Method","hookpress");?></th>
 		<th scope="col" class="manage-column" style="width:25%"><?php _e("URL","hookpress");?></th>
 		<th scope="col" class="manage-column"><?php _e("Fields","hookpress");?></th>
 	</tr>
@@ -208,6 +226,7 @@ function hookpress_print_webhooks_table() {
 	<tfoot>
 	<tr>
 		<th scope="col" class="manage-column"><?php _e("Hook","hookpress");?></th>
+		<th scope="col" class="manage-column"><?php _e("Method","hookpress");?></th>
 		<th scope="col" class="manage-column"><?php _e("URL","hookpress");?></th>
 		<th scope="col" class="manage-column"><?php _e("Fields","hookpress");?></th>
 	</tr>
@@ -239,6 +258,8 @@ function hookpress_register_hooks() {
 
 	$all_hooks = hookpress_get_hooks( );
 
+    error_log('###########################################################################' . var_export($all_hooks, true));
+
 	if (!is_array( $all_hooks ) )
 		return;
 
@@ -264,6 +285,8 @@ function hookpress_register_hooks() {
 
 function hookpress_generic_action($id,$args) {
 	global $hookpress_version, $wpdb, $hookpress_actions, $hookpress_filters, $wp_version;
+
+    error_log('*********************************************************************************');
 
 	$webhooks = hookpress_get_hooks( );
 	$desc = $webhooks[$id];
@@ -336,7 +359,19 @@ function hookpress_generic_action($id,$args) {
 
 	$user_agent = "HookPress/{$hookpress_version} (compatible; WordPress {$wp_version}; +http://mitcho.com/code/hookpress/)";
 
-	$request = apply_filters( 'hookpress_request', array('user-agent' => $user_agent, 'body' => $obj_to_post, 'referer' => get_bloginfo('url')) );
+    $url = $desc['url'];
+    $method = $desc['method'];
+    $request_args = array('user-agent' => $user_agent, 'referer' => get_bloginfo('url'), 'method' => $method);
+    if ($method == 'GET') {
+        $url = add_query_arg($obj_to_post, $url);
+    } else {
+        $request_args['body'] = $obj_to_post;
+    }
 
-	return wp_remote_post($desc['url'], $request);
+    error_log("%% URL: $url");
+    error_log("%% method: $method");
+    error_log("%% request_args: ".var_export($request_args, true));
+
+	$request = apply_filters( 'hookpress_request', $request_args );
+	return wp_remote_request($url, $request);
 }
